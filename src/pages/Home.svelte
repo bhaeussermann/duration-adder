@@ -1,21 +1,31 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import DurationInput from '../components/DurationInput.svelte';
-import type { Duration } from '../common/duration';
+import { Duration } from '../common/duration';
 
 let firstInput: DurationInput;
 
 onMount(() => firstInput.focus());
 
 let durations: Duration[] = [];
-durations.push({ hours: 0, minutes: 0 });
+durations.push(Duration.Zero);
+
+$: totalDuration = getTotalDuration(durations);
+
+function getTotalDuration(durations: Duration[]): Duration {
+  let totalMinutes = 0;
+  for (let duration of durations) {
+    totalMinutes += duration.hours * 60 + duration.minutes;
+  }
+  return new Duration(Math.floor(totalMinutes / 60), totalMinutes % 60);
+}
 
 function handleDurationChanged(index: number) {
   const isLast = index === durations.length - 1;
   if (isLast) {
     const lastDuration = durations[index];
-    if (!!(lastDuration.hours + lastDuration.minutes)) {
-      durations.push({ hours: 0, minutes: 0 });
+    if (!lastDuration.isZero) {
+      durations.push(Duration.Zero);
     }
   }
 }
@@ -24,7 +34,7 @@ function handleDurationBlur(index: number) {
   const isLast = index === durations.length - 1;
   if (!isLast) {
     const blurredDuration = durations[index];
-    if (!(blurredDuration.hours + blurredDuration.minutes)) {
+    if (blurredDuration.isZero) {
       durations = durations.filter((_, i) => i !== index);
     }
   }
@@ -40,3 +50,6 @@ function handleDurationBlur(index: number) {
     on:blur={() => handleDurationBlur(index)} />
 </div>
 {/each}
+
+<div>Total duration:</div>
+<div>{totalDuration}</div>

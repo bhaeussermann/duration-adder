@@ -1,8 +1,8 @@
 <script lang="ts">
 import { onMount, createEventDispatcher } from 'svelte';
-import type { Duration } from '../common/duration';
+import { Duration } from '../common/duration';
 
-export let duration: Duration = { hours: 0, minutes: 0 }
+export let duration = Duration.Zero;
 
 export const focus = () => textBox.focus();
 
@@ -46,26 +46,17 @@ function onInput() {
 
 function parseText(text: string) {
   if (!text.length) {
-    duration = { hours: 0, minutes: 0 };
+    duration = Duration.Zero;
   } else {
     const digits = text.replace(/[^\d]/g, '');
-    duration = {
-      hours: digits.length > 2 ? parseInt(digits.substring(0, digits.length - 2)) : 0,
-      minutes: parseInt(digits.substring(Math.max(0, digits.length - 2)))
-    };
+    duration = new Duration(
+      digits.length > 2 ? parseInt(digits.substring(0, digits.length - 2)) : 0,
+      parseInt(digits.substring(Math.max(0, digits.length - 2))));
   }
 }
 
 function formatText(duration: Duration) {
-  if (!(duration.hours + duration.minutes)) {
-    textBox.value = '';
-  } else {
-    textBox.value = !duration.hours ? duration.minutes + 'm' : `${duration.hours}h ${pad(duration.minutes)}m`;
-  }
-
-  function pad(numberToPad: number) {
-    return (numberToPad < 10 ? '0' : '') + numberToPad;
-  };
+  textBox.value = duration.isZero ? '' : duration.toString();
 }
 </script>
 
