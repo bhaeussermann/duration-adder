@@ -1,12 +1,22 @@
 <script lang="ts">
-import { onMount } from 'svelte';
+import { onMount, createEventDispatcher } from 'svelte';
 import type { Duration } from '../common/duration';
 
 export let duration: Duration = { hours: 0, minutes: 0 }
 
+export const focus = () => textBox.focus();
+
+const eventDispatcher = createEventDispatcher();
+
 let textBox: HTMLInputElement;
 
-onMount(() => textBox.focus());
+onMount(() => formatText(duration));
+
+$: {
+  if (!!textBox) {
+    formatText(duration);
+  }
+}
 
 function onKeyDown(event: KeyboardEvent) {
   const isAcceptedKey = event.ctrlKey || event.metaKey
@@ -21,42 +31,51 @@ function onSelectionChange(event: Event) {
   const isSelectionEmpty = textBox.selectionStart === textBox.selectionEnd;
   if (isSelectionEmpty) {
     event.preventDefault();
-    const lastCharacterPosition = textBox.value.length;
+    const lastCharacterPosition = textBox.value.length === 0 ? 0 : textBox.value.length - 1;
     textBox.setSelectionRange(lastCharacterPosition, lastCharacterPosition);
   }
 }
 
 function onInput() {
-  formatText();
-
-  const parts = textBox.value.split(':');
-  duration = parts.length === 1
-    ? { hours: 0, minutes: parseInt(parts[0]) }
-    : { hours: parseInt(parts[0]), minutes: parseInt(parts[1]) };
+  parseText(textBox.value);
+  formatText(duration);
+  eventDispatcher('changed');
 }
 
-function formatText() {
-  let digits = textBox.value.replace(':', '');
-  if ((digits.length === 4) && (digits[0] === '0')) {
-    digits = digits.substring(1);
+function parseText(text: string) {
+  if (!text.length) {
+    duration = { hours: 0, minutes: 0 };
+  } else {
+    const digits = text.replace(/[^\d]/g, '');
+    duration = {
+      hours: digits.length > 2 ? parseInt(digits.substring(0, digits.length - 2)) : 0,
+      minutes: parseInt(digits.substring(Math.max(0, digits.length - 2)))
+    };
   }
-  if (digits.length === 2) {
-    digits = '0' + digits;
+}
+
+function formatText(duration: Duration) {
+  if (!(duration.hours + duration.minutes)) {
+    textBox.value = '';
+  } else {
+    textBox.value = !duration.hours ? duration.minutes + 'm' : `${duration.hours}h ${pad(duration.minutes)}m`;
   }
-  textBox.value = digits.length <=2
-    ? digits
-    : `${digits.substring(0, digits.length - 2)}:${digits.substring(digits.length - 2)}`;
+
+  function pad(numberToPad: number) {
+    return (numberToPad < 10 ? '0' : '') + numberToPad;
+  };
 }
 </script>
 
 <input
   bind:this={textBox}
   type="text"
-  placeholder="hh:mm"
-  maxlength="5"
+  placeholder="hh mm"
+  maxlength="7"
   on:keydown={onKeyDown}
   on:selectionchange={onSelectionChange}
-  on:input={onInput} />
+  on:input={onInput}
+  on:blur={() => eventDispatcher('blur')} />
 
 <style>
 input {
