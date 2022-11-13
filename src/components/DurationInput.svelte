@@ -45,10 +45,10 @@ function onInput() {
 }
 
 function parseText(text: string) {
-  if (!text.length) {
+  const digits = text.replace(/[^\d]/g, '');
+  if (!digits.length) {
     duration = Duration.Zero;
   } else {
-    const digits = text.replace(/[^\d]/g, '');
     duration = new Duration(
       digits.length > 2 ? parseInt(digits.substring(0, digits.length - 2)) : 0,
       parseInt(digits.substring(Math.max(0, digits.length - 2))));
