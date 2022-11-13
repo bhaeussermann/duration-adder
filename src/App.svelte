@@ -4,5 +4,19 @@ import Home from './pages/Home.svelte';
 
 <main>
   <h1>Duration Adder</h1>
-  <Home />
+  <div>
+    <Home />
+  </div>
 </main>
+
+<style lang="scss">
+  main {
+    display: flex;
+    flex-direction: column;
+
+    > div {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+</style>

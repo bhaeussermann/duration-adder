@@ -74,6 +74,8 @@ function formatText(duration: Duration) {
 
 <style lang="scss">
 input {
+  width: 120px;
+  font-size: 1.8em;
   text-align: right;
 
   &.error {

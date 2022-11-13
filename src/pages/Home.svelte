@@ -42,7 +42,7 @@ function handleDurationBlur(index: number) {
 </script>
 
 {#each durations as duration, index}
-<div>
+<div class="duration-container">
   <DurationInput
     bind:this={firstInput}
     bind:duration={duration}
@@ -51,5 +51,32 @@ function handleDurationBlur(index: number) {
 </div>
 {/each}
 
-<div>Total duration:</div>
-<div>{totalDuration}</div>
+<div class="result-container">
+  <div class="result-label">Total duration:</div>
+  <div class="result-value">{totalDuration}</div>
+</div>
+
+<style lang="scss">
+  .duration-container {
+    margin: 15px;
+  }
+
+  .result-container {
+    display: flex;
+    flex-direction: column;
+
+    > div {
+      margin-left: auto;
+      margin-right: auto;
+      
+      &.result-label {
+        font-size: 1.2em;
+      }
+
+      &.result-value {
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+    }
+  }
+</style>
