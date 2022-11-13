@@ -18,6 +18,8 @@ $: {
   }
 }
 
+$: hasError = duration.minutes >= 60;
+
 function onKeyDown(event: KeyboardEvent) {
   const isAcceptedKey = event.ctrlKey || event.metaKey
     || ['Backspace', 'Delete', 'Tab'].includes(event.code)
@@ -72,13 +74,20 @@ function formatText(duration: Duration) {
   type="text"
   placeholder="hh mm"
   maxlength="7"
+  class={hasError ? 'error' : ''}
+  title={hasError ? 'Invalid duration' : ''}
   on:keydown={onKeyDown}
   on:selectionchange={onSelectionChange}
   on:input={onInput}
   on:blur={() => eventDispatcher('blur')} />
 
-<style>
+<style lang="scss">
 input {
   text-align: right;
+
+  &.error {
+    border-color: red;
+    outline: none;
+  }
 }
 </style>
