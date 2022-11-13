@@ -38,13 +38,22 @@ function onSelectionChange(event: Event) {
   }
 }
 
-function onInput() {
-  parseText(textBox.value);
+function onFocus() {
+  textBox.setSelectionRange(0, textBox.value.length);
+}
+
+function onInput(event: Event) {
+  parseText(textBox.value, (event as InputEvent).inputType === 'deleteContentBackward');
   formatText(duration);
   eventDispatcher('changed');
 }
 
-function parseText(text: string) {
+function parseText(text: string, didDeleteContentBackward: boolean = false) {
+  const didRemoveLastCharacter = didDeleteContentBackward && !text.includes('m');
+  if (didRemoveLastCharacter) {
+    text = text.substring(0, text.length - 1);
+  }
+
   const digits = text.replace(/[^\d]/g, '');
   if (!digits.length) {
     duration = Duration.Zero;
@@ -63,6 +72,7 @@ function formatText(duration: Duration) {
 <input
   bind:this={textBox}
   type="text"
+  inputmode="numeric"
   placeholder="hh mm"
   maxlength="7"
   class={hasError ? 'error' : ''}
@@ -70,6 +80,7 @@ function formatText(duration: Duration) {
   on:keydown={onKeyDown}
   on:selectionchange={onSelectionChange}
   on:input={onInput}
+  on:focus={onFocus}
   on:blur={() => eventDispatcher('blur')} />
 
 <style lang="scss">
