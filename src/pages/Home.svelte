@@ -1,16 +1,19 @@
 <script lang="ts">
-import { onMount } from 'svelte';
 import DurationInput from '../components/DurationInput.svelte';
 import { Duration } from '../common/duration';
 
-let firstInput: DurationInput;
-
-onMount(() => firstInput.focus());
-
-let durations: Duration[] = [];
-durations.push(Duration.Zero);
+let durations: Duration[];
+clearDurations();
 
 $: totalDuration = getTotalDuration(durations);
+
+function clearDurations() {
+  durations = [];
+  setTimeout(() => {
+    durations.push(Duration.Zero);
+    durations = durations;
+  });
+}
 
 function getTotalDuration(durations: Duration[]): Duration {
   let totalMinutes = 0;
@@ -18,6 +21,12 @@ function getTotalDuration(durations: Duration[]): Duration {
     totalMinutes += duration.hours * 60 + duration.minutes;
   }
   return new Duration(Math.floor(totalMinutes / 60), totalMinutes % 60);
+}
+
+function handleDurationInputAdded(containerElement: HTMLElement) {
+  if (durations.length === 1) {
+    (containerElement.firstChild as unknown as DurationInput).focus();
+  }
 }
 
 function handleDurationChanged(index: number) {
@@ -42,9 +51,8 @@ function handleDurationBlur(index: number) {
 </script>
 
 {#each durations as duration, index}
-<div class="duration-container">
+<div class="duration-container" use:handleDurationInputAdded>
   <DurationInput
-    bind:this={firstInput}
     bind:duration={duration}
     on:changed={() => handleDurationChanged(index)}
     on:blur={() => handleDurationBlur(index)} />
@@ -54,6 +62,16 @@ function handleDurationBlur(index: number) {
 <div class="result-container">
   <div class="result-label">Total duration:</div>
   <div class="result-value">{totalDuration}</div>
+</div>
+
+<div class="buttons-container">
+  {#if durations.length > 1}
+  <!-- svelte-ignore a11y-invalid-attribute -->
+  <a
+    href="javascript: void(0)"
+    on:click={clearDurations}
+    on:keypress={event => { if (event.code === 'Space') clearDurations(); }}>Clear</a>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -77,6 +95,15 @@ function handleDurationBlur(index: number) {
         font-size: 1.5em;
         font-weight: bold;
       }
+    }
+  }
+
+  .buttons-container {
+    display: flex;
+
+    > * {
+      margin-left: auto;
+      margin-right: auto;
     }
   }
 </style>

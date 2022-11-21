@@ -4,7 +4,7 @@ import { Duration } from '../common/duration';
 
 export let duration = Duration.Zero;
 
-export const focus = () => textBox.focus();
+export const focus = () => textBox?.focus();
 
 const eventDispatcher = createEventDispatcher();
 
